@@ -1,11 +1,11 @@
 sky:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    host: localhost
-    port: 3306
-    database: sky_take_out
+    host: sh-cynosdbmysql-grp-f9jkg102.sql.tencentcdb.com
+    port: 25211
+    database: springboot_demo
     username: root
-    password: 123456
+    password: Yuneyang2025
   alioss:
     endpoint: oss-cn-beijing.aliyuncs.com
     access-key-id: LTAI5tDGrULGdBBeUK9nAvSm
@@ -21,10 +21,10 @@ sky:
     secret: 67e593d7b48ad5d63d8a59a08e6a0d1e
     mchid: 1707625139
     mchSerialNo: 2402222766F361019D684135FD3347A1F815447C
-    privateKeyFilePath: D:\idea_workspace\shuo_web_project\sky-take-out\sky-server\src\main\resources\apiclient_key.pem
+    privateKeyFilePath: sky-server/src/main/resources/apiclient_key.pem
     apiV3Key: Yf133804353831770766266112345678
-    weChatPayCertFilePath: D:\idea_workspace\shuo_web_project\sky-take-out\sky-server\src\main\resources\wechatpay_6FF64294A34E64F7C99FBE9C20DF022C99749775.pem
-    notifyUrl: https://7b99185c.r24.cpolar.top/notify/paySuccess
-    refundNotifyUrl: https://7b99185c.r24.cpolar.top/notify/refundSuccess
+    weChatPayCertFilePath: sky-server/src/main/resources/wechatpay_6FF64294A34E64F7C99FBE9C20DF022C99749775.pem
+    notifyUrl: https://springboot-t27o-145133-5-1347496152.sh.run.tcloudbase.com/notify/paySuccess
+    refundNotifyUrl: https://springboot-t27o-145133-5-1347496152.sh.run.tcloudbase.com/notify/refundSuccess
 
 
