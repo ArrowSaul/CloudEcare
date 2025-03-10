@@ -24,7 +24,7 @@ sky:
     privateKeyFilePath: sky-server/src/main/resources/apiclient_key.pem
     apiV3Key: Yf133804353831770766266112345678
     weChatPayCertFilePath: sky-server/src/main/resources/wechatpay_6FF64294A34E64F7C99FBE9C20DF022C99749775.pem
-    notifyUrl: https://springboot-t27o-145133-5-1347496152.sh.run.tcloudbase.com/notify/paySuccess
-    refundNotifyUrl: https://springboot-t27o-145133-5-1347496152.sh.run.tcloudbase.com/notify/refundSuccess
+    notifyUrl: https://springboot-a3qs-145133-5-1347496152.sh.run.tcloudbase.com/notify/paySuccess
+    refundNotifyUrl: https://springboot-a3qs-145133-5-1347496152.sh.run.tcloudbase.com/notify/refundSuccess
 
 
