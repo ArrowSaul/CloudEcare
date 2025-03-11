@@ -59,6 +59,8 @@ public class OrderServiceImpl implements OrderService {
     private WeChatPayUtil weChatPayUtil;
     @Autowired
     private WebSocketServer webSocketServer;
+    @Autowired
+    private OrderService orderService;
 
     /**
      * 用户下单
@@ -124,12 +126,12 @@ public class OrderServiceImpl implements OrderService {
         // 当前登录用户id
         Long userId = BaseContext.getCurrentId();
         User user = userMapper.getById(userId);
-
+        Double amount = orderMapper.getByOrderNumber(ordersPaymentDTO.getOrderNumber());
         //调用微信支付接口，生成预支付交易单
         JSONObject jsonObject = weChatPayUtil.pay(
                 ordersPaymentDTO.getOrderNumber(), //商户订单号
-                new BigDecimal(0.01), //支付金额，单位 元
-                "苍穹外卖订单", //商品描述
+                new BigDecimal(amount), //支付金额，单位 元
+                "云e养订单", //商品描述
                 user.getOpenid() //微信用户的openid
         );
 

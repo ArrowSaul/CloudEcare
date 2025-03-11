@@ -38,6 +38,10 @@ WORKDIR /app
 # 将构建产物jar包拷贝到运行时目录中
 COPY --from=build /app/sky-server/target/*.jar /app/app.jar
 
+# 确保证书文件被复制到最终镜像中
+COPY --from=build /app/sky-server/src/main/resources/apiclient_key.pem /app/apiclient_key.pem
+COPY --from=build /app/sky-server/src/main/resources/wechatpay_6FF64294A34E64F7C99FBE9C20DF022C99749775.pem /app/wechatpay_6FF64294A34E64F7C99FBE9C20DF022C99749775.pem
+
 # 暴露端口 - 微信云托管使用80端口
 EXPOSE 80
 

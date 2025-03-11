@@ -15,11 +15,13 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.PrivateKey;
 import java.security.Signature;
@@ -52,11 +54,21 @@ public class WeChatPayUtil {
     private CloseableHttpClient getClient() {
         PrivateKey merchantPrivateKey = null;
         try {
+            // 修改为使用类路径资源加载方式
+            String privateKeyFileName = weChatProperties.getPrivateKeyFilePath().substring(
+                    weChatProperties.getPrivateKeyFilePath().lastIndexOf("/") + 1);
+            String certFileName = weChatProperties.getWeChatPayCertFilePath().substring(
+                    weChatProperties.getWeChatPayCertFilePath().lastIndexOf("/") + 1);
+            
+            // 通过ClassPathResource加载资源
+            ClassPathResource privateKeyResource = new ClassPathResource(privateKeyFileName);
+            ClassPathResource certResource = new ClassPathResource(certFileName);
+            
             //merchantPrivateKey商户API私钥，如何加载商户API私钥请看常见问题
-            merchantPrivateKey = PemUtil.loadPrivateKey(new FileInputStream(new File(weChatProperties.getPrivateKeyFilePath())));
+            merchantPrivateKey = PemUtil.loadPrivateKey(privateKeyResource.getInputStream());
             //加载平台证书文件
-            X509Certificate x509Certificate = PemUtil.loadCertificate(new FileInputStream(new File(weChatProperties.getWeChatPayCertFilePath())));
-            //wechatPayCertificates微信支付平台证书列表。你也可以使用后面章节提到的“定时更新平台证书功能”，而不需要关心平台证书的来龙去脉
+            X509Certificate x509Certificate = PemUtil.loadCertificate(certResource.getInputStream());
+            //wechatPayCertificates微信支付平台证书列表。你也可以使用后面章节提到的"定时更新平台证书功能"，而不需要关心平台证书的来龙去脉
             List<X509Certificate> wechatPayCertificates = Arrays.asList(x509Certificate);
 
             WechatPayHttpClientBuilder builder = WechatPayHttpClientBuilder.create()
@@ -66,7 +78,7 @@ public class WeChatPayUtil {
             // 通过WechatPayHttpClientBuilder构造的HttpClient，会自动的处理签名和验签
             CloseableHttpClient httpClient = builder.build();
             return httpClient;
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
@@ -188,7 +200,13 @@ public class WeChatPayUtil {
             byte[] message = signMessage.getBytes();
 
             Signature signature = Signature.getInstance("SHA256withRSA");
-            signature.initSign(PemUtil.loadPrivateKey(new FileInputStream(new File(weChatProperties.getPrivateKeyFilePath()))));
+            
+            // 修改为使用类路径资源加载方式
+            String privateKeyFileName = weChatProperties.getPrivateKeyFilePath().substring(
+                    weChatProperties.getPrivateKeyFilePath().lastIndexOf("/") + 1);
+            ClassPathResource privateKeyResource = new ClassPathResource(privateKeyFileName);
+            
+            signature.initSign(PemUtil.loadPrivateKey(privateKeyResource.getInputStream()));
             signature.update(message);
             String packageSign = Base64.getEncoder().encodeToString(signature.sign());
 

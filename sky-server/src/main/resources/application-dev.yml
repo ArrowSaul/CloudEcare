@@ -11,19 +11,19 @@ sky:
     access-key-id: LTAI5tDGrULGdBBeUK9nAvSm
     access-key-secret: su3JIAi83LdgyhuqwGcsmJ76KXGzzN
     bucket-name: sky-itcast-shuo
-  redis:
-    host: localhost
-    port: 6379
-    password: 123456
-    database: 10
+#  redis:
+#    host: localhost
+#    port: 6379
+#    password: 123456
+#    database: 10
   wechat:
     appid: wxefcf0e1c84a7810e
     secret: 67e593d7b48ad5d63d8a59a08e6a0d1e
     mchid: 1707625139
     mchSerialNo: 2402222766F361019D684135FD3347A1F815447C
-    privateKeyFilePath: sky-server/src/main/resources/apiclient_key.pem
+    privateKeyFilePath: apiclient_key.pem
     apiV3Key: Yf133804353831770766266112345678
-    weChatPayCertFilePath: sky-server/src/main/resources/wechatpay_6FF64294A34E64F7C99FBE9C20DF022C99749775.pem
+    weChatPayCertFilePath: wechatpay_6FF64294A34E64F7C99FBE9C20DF022C99749775.pem
     notifyUrl: https://springboot-a3qs-145133-5-1347496152.sh.run.tcloudbase.com/notify/paySuccess
     refundNotifyUrl: https://springboot-a3qs-145133-5-1347496152.sh.run.tcloudbase.com/notify/refundSuccess
 
