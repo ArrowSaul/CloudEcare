@@ -46,10 +46,10 @@ COPY --from=build /app/sky-server/src/main/resources/wechatpay_6FF64294A34E64F7C
 RUN ls -la /app/*.pem
 
 # 暴露端口 - 微信云托管使用80端口
-EXPOSE 8080
+EXPOSE 80
 
 # 添加环境变量，指定服务端口为80
-ENV SERVER_PORT=8080
+ENV SERVER_PORT=80
 
 # 执行启动命令，添加日志输出，并设置系统属性以传递证书路径
-CMD ["java", "-Dserver.port=8080", "-Dlogging.level.root=info", "-Dlogging.level.com.sky=debug", "-Dsky.wechat.privateKeyFilePath=/app/apiclient_key.pem", "-Dsky.wechat.weChatPayCertFilePath=/app/wechatpay_6FF64294A34E64F7C99FBE9C20DF022C99749775.pem", "-jar", "/app/app.jar"]
+CMD ["java", "-Dserver.port=80", "-Dlogging.level.root=info", "-Dlogging.level.com.sky=debug", "-Dsky.wechat.privateKeyFilePath=/app/apiclient_key.pem", "-Dsky.wechat.weChatPayCertFilePath=/app/wechatpay_6FF64294A34E64F7C99FBE9C20DF022C99749775.pem", "-jar", "/app/app.jar"]
