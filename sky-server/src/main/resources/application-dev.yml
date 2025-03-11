@@ -21,9 +21,9 @@ sky:
     secret: 67e593d7b48ad5d63d8a59a08e6a0d1e
     mchid: 1707625139
     mchSerialNo: 2402222766F361019D684135FD3347A1F815447C
-    privateKeyFilePath: apiclient_key.pem
+    privateKeyFilePath: /app/apiclient_key.pem
     apiV3Key: Yf133804353831770766266112345678
-    weChatPayCertFilePath: wechatpay_6FF64294A34E64F7C99FBE9C20DF022C99749775.pem
+    weChatPayCertFilePath: /app/wechatpay_6FF64294A34E64F7C99FBE9C20DF022C99749775.pem
     notifyUrl: https://springboot-a3qs-145133-5-1347496152.sh.run.tcloudbase.com/notify/paySuccess
     refundNotifyUrl: https://springboot-a3qs-145133-5-1347496152.sh.run.tcloudbase.com/notify/refundSuccess
 
