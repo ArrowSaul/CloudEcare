@@ -1,11 +1,11 @@
 sky:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    host: sh-cynosdbmysql-grp-f9jkg102.sql.tencentcdb.com
-    port: 25211
-    database: springboot_demo
+    host: 8.141.118.201
+    port: 3306
+    database: sky_take_out
     username: root
-    password: Yuneyang2025
+    password: 123456
   alioss:
     endpoint: oss-cn-beijing.aliyuncs.com
     access-key-id: LTAI5tDGrULGdBBeUK9nAvSm
@@ -16,10 +16,10 @@ sky:
     secret: 67e593d7b48ad5d63d8a59a08e6a0d1e
     mchid: 1707625139
     mchSerialNo: 2402222766F361019D684135FD3347A1F815447C
-    privateKeyFilePath: /app/apiclient_key.pem
+    privateKeyFilePath: C:\java\apiclient_key.pem
     apiV3Key: Yf133804353831770766266112345678
-    weChatPayCertFilePath: /app/wechatpay_6FF64294A34E64F7C99FBE9C20DF022C99749775.pem
-    notifyUrl: https://springboot-a3qs-145133-5-1347496152.sh.run.tcloudbase.com/notify/paySuccess
-    refundNotifyUrl: https://springboot-a3qs-145133-5-1347496152.sh.run.tcloudbase.com/notify/refundSuccess
+    weChatPayCertFilePath: C:\java\wechatpay_6FF64294A34E64F7C99FBE9C20DF022C99749775.pem
+    notifyUrl: https://yuneyang.top/notify/paySuccess
+    refundNotifyUrl: https://yuneyang.top/notify/refundSuccess
 
 

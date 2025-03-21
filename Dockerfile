@@ -41,15 +41,15 @@ COPY --from=build /app/sky-server/target/*.jar /app/app.jar
 # 确保证书文件被复制到最终镜像中
 COPY --from=build /app/sky-server/src/main/resources/apiclient_key.pem /app/apiclient_key.pem
 COPY --from=build /app/sky-server/src/main/resources/wechatpay_6FF64294A34E64F7C99FBE9C20DF022C99749775.pem /app/wechatpay_6FF64294A34E64F7C99FBE9C20DF022C99749775.pem
-
+RUN chmod 644 /app/*.pem  # 确保可读
 # 验证证书文件是否存在
 RUN ls -la /app/*.pem
 
-# 暴露端口 - 微信云托管使用80端口
-EXPOSE 80
+# 暴露端口 - 微信云托管使用8080端口
+EXPOSE 8080
 
-# 添加环境变量，指定服务端口为80
-ENV SERVER_PORT=80
+# 添加环境变量，指定服务端口为8080
+ENV SERVER_PORT=8080
 
-# 执行启动命令，添加日志输出，并设置系统属性以传递证书路径
-CMD ["java", "-Dserver.port=80", "-Dlogging.level.root=info", "-Dlogging.level.com.sky=debug", "-Dsky.wechat.privateKeyFilePath=/app/apiclient_key.pem", "-Dsky.wechat.weChatPayCertFilePath=/app/wechatpay_6FF64294A34E64F7C99FBE9C20DF022C99749775.pem", "-jar", "/app/app.jar"]
+# 精简启动命令（server.port 已在配置文件中设置）
+CMD ["java", "-jar", "/app/app.jar"]

@@ -209,12 +209,12 @@ public class OrderServiceImpl implements OrderService {
 
         orderMapper.update(orders);
 
-        // 通过WebSocket向客户端浏览器推送消息
-        Map map = new HashMap();
-        map.put("type", 1);// 1：表示来一条新订单 2： 表示客户催单
-        map.put("orderId", ordersDB.getId());
-        map.put("content", "订单号：" + ordersDB.getNumber());
-        webSocketServer.sendToAllClient(JSON.toJSONString(map));
+//        // 通过WebSocket向客户端浏览器推送消息
+//        Map map = new HashMap();
+//        map.put("type", 1);// 1：表示来一条新订单 2： 表示客户催单
+//        map.put("orderId", ordersDB.getId());
+//        map.put("content", "订单号：" + ordersDB.getNumber());
+//        webSocketServer.sendToAllClient(JSON.toJSONString(map));
     }
     /**
      * 用户端订单分页查询

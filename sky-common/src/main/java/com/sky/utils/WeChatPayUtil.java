@@ -18,10 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.security.PrivateKey;
 import java.security.Signature;
@@ -30,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+
+import javax.annotation.PostConstruct;
 
 /**
  * 微信支付工具类
@@ -46,80 +45,166 @@ public class WeChatPayUtil {
     @Autowired
     private WeChatProperties weChatProperties;
 
+    @PostConstruct
+    public void init() {
+        try {
+            System.out.println("=== 微信支付工具类初始化开始 ===");
+            System.out.println("当前工作目录: " + new File(".").getAbsolutePath());
+            
+            // 验证证书配置
+            String privateKeyPath = weChatProperties.getPrivateKeyFilePath();
+            String certPath = weChatProperties.getWeChatPayCertFilePath();
+            
+            System.out.println("私钥路径配置: " + privateKeyPath);
+            System.out.println("证书路径配置: " + certPath);
+            
+            // 尝试初始化客户端
+            CloseableHttpClient client = getClient();
+            if (client == null) {
+                System.err.println("!!! 警告：微信支付客户端初始化失败，支付功能可能无法正常工作 !!!");
+            } else {
+                System.out.println("微信支付客户端初始化成功");
+                client.close();
+            }
+            
+            System.out.println("=== 微信支付工具类初始化完成 ===");
+        } catch (Exception e) {
+            System.err.println("!!! 微信支付工具类初始化异常 !!!");
+            e.printStackTrace();
+            // 不抛出异常，允许应用继续启动
+        }
+    }
+
+    /**
+     * 加载证书文件
+     * @param filePath 文件路径
+     * @return InputStream
+     * @throws IOException
+     */
+    private InputStream loadCertFile(String filePath) throws IOException {
+        // 1. 先尝试直接加载
+        File file = new File(filePath);
+        if (file.exists() && file.canRead() && file.length() > 0) {
+            System.out.println("从文件系统直接加载证书: " + file.getAbsolutePath());
+            System.out.println("文件大小: " + file.length() + " 字节");
+            return new FileInputStream(file);
+        }
+
+        // 2. 尝试从/app目录加载
+        file = new File("/app/" + new File(filePath).getName());
+        if (file.exists() && file.canRead() && file.length() > 0) {
+            System.out.println("从/app目录加载证书: " + file.getAbsolutePath());
+            System.out.println("文件大小: " + file.length() + " 字节");
+            return new FileInputStream(file);
+        }
+
+        // 3. 尝试从类路径加载
+        try {
+            ClassPathResource resource = new ClassPathResource(new File(filePath).getName());
+            if (resource.exists() && resource.contentLength() > 0) {
+                System.out.println("从类路径加载证书: " + resource.getPath());
+                System.out.println("资源大小: " + resource.contentLength() + " 字节");
+                return resource.getInputStream();
+            }
+        } catch (Exception e) {
+            System.err.println("从类路径加载证书失败: " + e.getMessage());
+        }
+
+        // 4. 输出更详细的错误信息
+        StringBuilder error = new StringBuilder("无法找到或读取证书文件: " + filePath + "\n");
+        error.append("已尝试以下路径：\n");
+        
+        file = new File(filePath);
+        error.append("1. ").append(file.getAbsolutePath())
+             .append(" [存在: ").append(file.exists())
+             .append(", 可读: ").append(file.exists() && file.canRead())
+             .append(", 大小: ").append(file.exists() ? file.length() : 0).append(" 字节]\n");
+        
+        file = new File("/app/" + new File(filePath).getName());
+        error.append("2. ").append(file.getAbsolutePath())
+             .append(" [存在: ").append(file.exists())
+             .append(", 可读: ").append(file.exists() && file.canRead())
+             .append(", 大小: ").append(file.exists() ? file.length() : 0).append(" 字节]\n");
+        
+        error.append("3. classpath:").append(new File(filePath).getName()).append("\n");
+        
+        // 输出当前目录信息
+        error.append("\n当前目录 (").append(new File(".").getAbsolutePath()).append(") 内容:\n");
+        File currentDir = new File(".");
+        if (currentDir.exists() && currentDir.isDirectory()) {
+            File[] files = currentDir.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    error.append("- ").append(f.getName())
+                         .append(" [").append(f.isDirectory() ? "目录" : "文件")
+                         .append(", ").append(f.length()).append(" 字节]\n");
+                }
+            }
+        }
+        
+        // 输出/app目录信息
+        error.append("\n/app 目录内容:\n");
+        File appDir = new File("/app");
+        if (appDir.exists() && appDir.isDirectory()) {
+            File[] files = appDir.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    error.append("- ").append(f.getName())
+                         .append(" [").append(f.isDirectory() ? "目录" : "文件")
+                         .append(", ").append(f.length()).append(" 字节]\n");
+                }
+            }
+        }
+
+        throw new FileNotFoundException(error.toString());
+    }
+
     /**
      * 获取调用微信接口的客户端工具对象
      *
      * @return
      */
     private CloseableHttpClient getClient() {
-        PrivateKey merchantPrivateKey = null;
         try {
-            // 尝试多种路径加载证书文件
-            String privateKeyFileName = weChatProperties.getPrivateKeyFilePath();
-            String certFileName = weChatProperties.getWeChatPayCertFilePath();
+            String privateKeyPath = weChatProperties.getPrivateKeyFilePath();
+            String certPath = weChatProperties.getWeChatPayCertFilePath();
             
-            // 先尝试从应用根目录加载
-            File privateKeyFile = new File(privateKeyFileName);
-            File certFile = new File(certFileName);
+            System.out.println("开始加载证书文件...");
+            System.out.println("私钥路径: " + privateKeyPath);
+            System.out.println("证书路径: " + certPath);
             
-            // 如果在根目录找不到，尝试从多个可能的路径查找
-            if (!privateKeyFile.exists()) {
-                File workingDir = new File(".");
-                System.out.println("当前工作目录: " + workingDir.getAbsolutePath());
-                
-                // 尝试从/app路径加载
-                privateKeyFile = new File("/app/" + privateKeyFileName);
-                certFile = new File("/app/" + certFileName);
-                
-                // 如果还是找不到，尝试从类路径加载
-                if (!privateKeyFile.exists()) {
-                    System.out.println("尝试从类路径加载证书");
-                    try {
-                        ClassPathResource privateKeyResource = new ClassPathResource(privateKeyFileName);
-                        ClassPathResource certResource = new ClassPathResource(certFileName);
-                        
-                        merchantPrivateKey = PemUtil.loadPrivateKey(privateKeyResource.getInputStream());
-                        X509Certificate x509Certificate = PemUtil.loadCertificate(certResource.getInputStream());
-                        List<X509Certificate> wechatPayCertificates = Arrays.asList(x509Certificate);
-                        
-                        WechatPayHttpClientBuilder builder = WechatPayHttpClientBuilder.create()
-                                .withMerchant(weChatProperties.getMchid(), weChatProperties.getMchSerialNo(), merchantPrivateKey)
-                                .withWechatPay(wechatPayCertificates);
-                                
-                        return builder.build();
-                    } catch (Exception e) {
-                        System.err.println("从类路径加载证书失败: " + e.getMessage());
-                    }
-                    
-                    // 列出所有可能的路径以便调试
-                    System.out.println("在以下目录查找证书文件:");
-                    System.out.println("1. " + new File(privateKeyFileName).getAbsolutePath());
-                    System.out.println("2. " + new File("/app/" + privateKeyFileName).getAbsolutePath());
-                    
-                    throw new FileNotFoundException("无法找到证书文件，已尝试多种路径");
-                }
+            // 加载私钥
+            InputStream privateKeyStream = loadCertFile(privateKeyPath);
+            PrivateKey merchantPrivateKey = PemUtil.loadPrivateKey(privateKeyStream);
+            
+            // 加载证书
+            InputStream certStream = loadCertFile(certPath);
+            X509Certificate x509Certificate = PemUtil.loadCertificate(certStream);
+            
+            // 验证证书
+            if (merchantPrivateKey == null) {
+                throw new Exception("私钥加载失败");
+            }
+            if (x509Certificate == null) {
+                throw new Exception("证书加载失败");
             }
             
-            // 记录文件路径和是否存在，方便排查问题
-            System.out.println("privateKeyFile路径: " + privateKeyFile.getAbsolutePath() + ", 文件存在: " + privateKeyFile.exists());
-            System.out.println("certFile路径: " + certFile.getAbsolutePath() + ", 文件存在: " + certFile.exists());
+            // 验证证书有效期
+            try {
+                x509Certificate.checkValidity();
+            } catch (Exception e) {
+                throw new Exception("证书已过期或尚未生效: " + e.getMessage());
+            }
             
-            //merchantPrivateKey商户API私钥，如何加载商户API私钥请看常见问题
-            merchantPrivateKey = PemUtil.loadPrivateKey(new FileInputStream(privateKeyFile));
-            //加载平台证书文件
-            X509Certificate x509Certificate = PemUtil.loadCertificate(new FileInputStream(certFile));
-            //wechatPayCertificates微信支付平台证书列表。你也可以使用后面章节提到的"定时更新平台证书功能"，而不需要关心平台证书的来龙去脉
             List<X509Certificate> wechatPayCertificates = Arrays.asList(x509Certificate);
 
             WechatPayHttpClientBuilder builder = WechatPayHttpClientBuilder.create()
                     .withMerchant(weChatProperties.getMchid(), weChatProperties.getMchSerialNo(), merchantPrivateKey)
                     .withWechatPay(wechatPayCertificates);
 
-            // 通过WechatPayHttpClientBuilder构造的HttpClient，会自动的处理签名和验签
-            CloseableHttpClient httpClient = builder.build();
-            return httpClient;
+            System.out.println("证书加载成功，创建HttpClient实例");
+            return builder.build();
         } catch (Exception e) {
-            // 增强错误日志输出，便于排查
             System.err.println("获取微信支付客户端失败: " + e.getMessage());
             e.printStackTrace();
             return null;
@@ -135,6 +220,9 @@ public class WeChatPayUtil {
      */
     private String post(String url, String body) throws Exception {
         CloseableHttpClient httpClient = getClient();
+        if (httpClient == null) {
+            throw new Exception("无法创建微信支付客户端，请检查证书配置");
+        }
 
         HttpPost httpPost = new HttpPost(url);
         httpPost.addHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.toString());
@@ -142,9 +230,13 @@ public class WeChatPayUtil {
         httpPost.addHeader("Wechatpay-Serial", weChatProperties.getMchSerialNo());
         httpPost.setEntity(new StringEntity(body, "UTF-8"));
 
+        System.out.println("发送POST请求到: " + url);
+        System.out.println("请求体: " + body);
+
         CloseableHttpResponse response = httpClient.execute(httpPost);
         try {
             String bodyAsString = EntityUtils.toString(response.getEntity());
+            System.out.println("收到响应: " + bodyAsString);
             return bodyAsString;
         } finally {
             httpClient.close();
@@ -219,11 +311,15 @@ public class WeChatPayUtil {
      */
     public JSONObject pay(String orderNum, BigDecimal total, String description, String openid) throws Exception {
         try {
-            //统一下单，生成预支付交易单
+            System.out.println("开始处理支付请求...");
+            System.out.println("订单号: " + orderNum);
+            System.out.println("金额: " + total);
+            System.out.println("描述: " + description);
+            System.out.println("openid: " + openid);
+
             String bodyAsString = jsapi(orderNum, total, description, openid);
-            //解析返回结果
             JSONObject jsonObject = JSON.parseObject(bodyAsString);
-            System.out.println("微信支付统一下单结果:" + jsonObject);
+            System.out.println("微信支付统一下单结果: " + jsonObject);
 
             String prepayId = jsonObject.getString("prepay_id");
             if (prepayId != null) {
@@ -234,7 +330,7 @@ public class WeChatPayUtil {
                 list.add(timeStamp);
                 list.add(nonceStr);
                 list.add("prepay_id=" + prepayId);
-                //二次签名，调起支付需要重新签名
+
                 StringBuilder stringBuilder = new StringBuilder();
                 for (Object o : list) {
                     stringBuilder.append(o).append("\n");
@@ -242,32 +338,13 @@ public class WeChatPayUtil {
                 String signMessage = stringBuilder.toString();
                 byte[] message = signMessage.getBytes();
 
+                System.out.println("开始进行签名...");
                 Signature signature = Signature.getInstance("SHA256withRSA");
-                
-                // 尝试多种路径加载
-                String privateKeyFileName = weChatProperties.getPrivateKeyFilePath();
-                File privateKeyFile = new File(privateKeyFileName);
-                
-                if (!privateKeyFile.exists()) {
-                    privateKeyFile = new File("/app/" + privateKeyFileName);
-                    if (!privateKeyFile.exists()) {
-                        try {
-                            ClassPathResource privateKeyResource = new ClassPathResource(privateKeyFileName);
-                            signature.initSign(PemUtil.loadPrivateKey(privateKeyResource.getInputStream()));
-                        } catch (Exception e) {
-                            throw new FileNotFoundException("无法找到证书文件: " + privateKeyFileName);
-                        }
-                    } else {
-                        signature.initSign(PemUtil.loadPrivateKey(new FileInputStream(privateKeyFile)));
-                    }
-                } else {
-                    signature.initSign(PemUtil.loadPrivateKey(new FileInputStream(privateKeyFile)));
-                }
-                
+                signature.initSign(PemUtil.loadPrivateKey(loadCertFile(weChatProperties.getPrivateKeyFilePath())));
                 signature.update(message);
                 String packageSign = Base64.getEncoder().encodeToString(signature.sign());
+                System.out.println("签名完成");
 
-                //构造数据给微信小程序，用于调起微信支付
                 JSONObject jo = new JSONObject();
                 jo.put("timeStamp", timeStamp);
                 jo.put("nonceStr", nonceStr);
@@ -281,7 +358,6 @@ public class WeChatPayUtil {
         } catch (Exception e) {
             System.err.println("微信支付调用异常: " + e.getMessage());
             e.printStackTrace();
-            // 返回带错误信息的JSON对象
             JSONObject errorJson = new JSONObject();
             errorJson.put("code", "ERROR");
             errorJson.put("message", e.getMessage());
