@@ -9,6 +9,7 @@ import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -76,4 +77,6 @@ public interface SetmealMapper {
      * @return
      */
     Integer countByMap(Map map);
+    @Select("select * from setmeal where name = #{setmealName}")
+    Setmeal getByName(String setmealName);
 }

@@ -1,5 +1,6 @@
 package com.sky.service;
 
+import com.sky.dto.ShoppingCartAIDTO;
 import com.sky.dto.ShoppingCartDTO;
 import com.sky.entity.ShoppingCart;
 
@@ -26,4 +27,10 @@ public interface ShoppingCartService {
      * @return
      */
     void subShoppingCart(ShoppingCartDTO shoppingCartDTO);
+
+    /**
+     * AI下单添加购物车
+     * @param shoppingCartAIDTO
+     */
+    void addShoppingCartAI(ShoppingCartAIDTO shoppingCartAIDTO);
 }

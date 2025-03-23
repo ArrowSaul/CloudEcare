@@ -69,4 +69,12 @@ public interface DishMapper {
      * @return
      */
     Integer countByMap(Map map);
+
+    /**
+     * 根据菜品名称查询菜品
+     * @param dishName
+     * @return
+     */
+    @Select("select * from dish where name = #{dishName}")
+    Dish getByName(String dishName);
 }

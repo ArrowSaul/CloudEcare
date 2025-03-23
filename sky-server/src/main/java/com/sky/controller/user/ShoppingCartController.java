@@ -1,5 +1,6 @@
 package com.sky.controller.user;
 
+import com.sky.dto.ShoppingCartAIDTO;
 import com.sky.dto.ShoppingCartDTO;
 import com.sky.entity.ShoppingCart;
 import com.sky.result.Result;
@@ -19,6 +20,18 @@ import java.util.List;
 public class ShoppingCartController {
     @Autowired
     private ShoppingCartService shoppingCartService;
+    /**
+     * AI下单添加购物车
+     * @param shoppingCartAIDTO
+     * @return
+     */
+    @PostMapping("/ai")
+    @ApiOperation("AI下单添加购物车")
+    public Result ai(@RequestBody ShoppingCartAIDTO shoppingCartAIDTO) {
+        log.info("AI下单添加购物车，商品信息为：{}", shoppingCartAIDTO);
+        shoppingCartService.addShoppingCartAI(shoppingCartAIDTO);
+        return Result.success();
+    }
     /**
      * 添加购物车
      * @param shoppingCartDTO

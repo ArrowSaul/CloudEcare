@@ -1,6 +1,7 @@
 package com.sky.service.impl;
 
 import com.sky.context.BaseContext;
+import com.sky.dto.ShoppingCartAIDTO;
 import com.sky.dto.ShoppingCartDTO;
 import com.sky.entity.Dish;
 import com.sky.entity.Setmeal;
@@ -110,6 +111,46 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 shoppingCart.setNumber(shoppingCart.getNumber() - 1);
                 shoppingCartMapper.updateNumberById(shoppingCart);
             }
+        }
+    }
+
+    /**
+     * AI下单添加购物车
+     *
+     * @param shoppingCartAIDTO
+     */
+    public void addShoppingCartAI(ShoppingCartAIDTO shoppingCartAIDTO) {
+        // 判断当前商品是否在购物车中
+        ShoppingCart shoppingCart = new ShoppingCart();
+        Dish dish = dishMapper.getByName(shoppingCartAIDTO.getDishName());
+        Setmeal setmeal = setmealMapper.getByName(shoppingCartAIDTO.getSetmealName());
+        if(dish != null){
+            //本次添加到购物车的是菜品
+            shoppingCart.setDishId(dish.getId());
+            shoppingCart.setName(dish.getName());
+            shoppingCart.setImage(dish.getImage());
+            shoppingCart.setAmount(dish.getPrice());
+        }
+        else {
+            //本次添加到购物车的是套餐
+            shoppingCart.setSetmealId(setmeal.getId());
+            shoppingCart.setName(setmeal.getName());
+            shoppingCart.setImage(setmeal.getImage());
+            shoppingCart.setAmount(setmeal.getPrice());
+        }
+        shoppingCart.setDishFlavor(shoppingCartAIDTO.getDishFlavor());
+        shoppingCart.setUserId(BaseContext.getCurrentId());
+        List<ShoppingCart> list = shoppingCartMapper.list(shoppingCart);
+        if( list != null&& list.size() > 0){
+            // 如果在，数量加一
+            ShoppingCart cart = list.get(0);
+            cart.setNumber(cart.getNumber() + 1);
+            shoppingCartMapper.updateNumberById(cart);
+        } else {
+            // 如果不在，插入一条数据到购物车
+            shoppingCart.setNumber(1);
+            shoppingCart.setCreateTime(LocalDateTime.now());
+            shoppingCartMapper.insert(shoppingCart);
         }
     }
 

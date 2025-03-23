@@ -101,4 +101,9 @@ public interface OrderService {
      * @return
      */
     void reminder(Long id);
+    /**
+     * 退款成功，修改订单状态
+     * @param outTradeNo
+     */
+    void refundSuccess(String outTradeNo);
 }
