@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sky.mapper.PatientMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO patient (
+            user_id, name, phone, sex, age,
+            id_number, medical_card_number
+        ) VALUES (
+                     #{userId}, #{name}, #{phone}, #{sex}, #{age},
+                     #{idNumber}, #{medicalCardNumber}
+                 )
+    </insert>
+    <select id="list" resultType="com.sky.entity.Patient">
+        select * from patient
+        <where>
+            <if test="userId != null">
+                and user_id = #{userId}
+            </if>
+        </where>
+    </select>
+    <delete id="deleteByIds">
+        delete from patient where id in
+        <foreach collection="ids" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+    </delete>
+    <update id="update" parameterType="Patient">
+        update patient
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="sex != null">sex = #{sex},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="medicalCardNumber != null">medical_card_number = #{medicalCardNumber},</if>
+        </set>
+        where id = #{id}
+    </update>
+</mapper>

@@ -96,4 +96,10 @@
         group by od.name
         order by number desc
     </select>
+    <select id="getOrdersIdsByPatientIds" resultType="java.lang.Long">
+        select id from orders where patient_id in
+        <foreach collection="patientIds" item="patientId" separator="," open="(" close=")">
+            #{patientId}
+        </foreach>
+    </select>
 </mapper>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sky.mapper.ChatMapper">
+    
+    <insert id="insert" parameterType="com.sky.entity.Chat">
+        INSERT INTO chat (order_id, customer_id, send_role, content, send_time, read_status)
+        VALUES (#{orderId}, #{customerId}, #{sendRole}, #{content}, #{sendTime}, #{readStatus})
+    </insert>
+    
+    <select id="selectByOrderId" resultType="com.sky.entity.Chat">
+        SELECT id, order_id, customer_id, send_role, content, send_time, read_status
+        FROM chat
+        WHERE order_id = #{orderId}
+        ORDER BY send_time ASC
+    </select>
+    
+    <update id="updateReadStatus">
+        UPDATE chat
+        SET read_status = #{readStatus}
+        WHERE id = #{chatId}
+    </update>
+    
+    <select id="countUnread" resultType="int">
+        SELECT COUNT(*)
+        FROM chat
+        WHERE order_id = #{orderId}
+        AND send_role != #{role}
+        AND read_status = 1
+    </select>
+</mapper> 

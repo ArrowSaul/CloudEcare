@@ -5,6 +5,7 @@ import com.sky.dto.GoodsSalesDTO;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.entity.Orders;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
@@ -96,4 +97,10 @@ public interface OrderMapper {
      */
     @Select("select amount from orders where number = #{orderNumber}")
     Double getByOrderNumber(String orderNumber);
+    /**
+     * 根据就诊人id查询订单id
+     * @param patientIds
+     * @return
+     */
+    List<Long> getOrdersIdsByPatientIds(@Param("patientIds") List<Long> patientIds);
 }
